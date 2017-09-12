@@ -292,17 +292,19 @@ class YARPP {
 	 * DIAGNOSTICS
 	 * @since 4.0 Moved into separate functions. Note return value types can differ.
 	 */
-	public function diagnostic_myisam_posts() {
+	public function diagnostic_fulltext_posts() {
 		global $wpdb;
+		$params = $wpdb->get_results("show variables like 'innodb_ft%';");
+		if (count($params) > 0) {
+			return true;
+		}
 		$tables = $wpdb->get_results("show table status like '{$wpdb->posts}'");
 		foreach ($tables as $table) {
 			if ($table->Engine === 'MyISAM'){
 				return true;
-            } else {
-				return $table->Engine;
             }
 		}
-		return 'UNKNOWN';
+		return false;
 	}
 	
 	function diagnostic_fulltext_disabled() {
@@ -317,7 +319,7 @@ class YARPP {
          */
         $overwrite = (bool) $this->get_option('myisam_override', false);
 		if (!$overwrite) {
-			$table_type = $this->diagnostic_myisam_posts();
+			$table_type = $this->diagnostic_fulltext_posts();
 			if ($table_type !== true) {
 				$this->disable_fulltext();
 				return false;
@@ -746,7 +748,7 @@ class YARPP {
 			$weight = $this->default_options['weight'];
 
 			// if we're still not using MyISAM
-			if (!$this->get_option('myisam_override') && $this->diagnostic_myisam_posts() !== true) {
+			if (!$this->get_option('myisam_override') && $this->diagnostic_fulltext_posts() !== true) {
 				unset($weight['title']);
 				unset($weight['body']);
 			}
@@ -885,7 +887,7 @@ class YARPP {
 				'cache_engine'  => YARPP_CACHE_TYPE
 			),
 			'diagnostics' => array(
-				'myisam_posts'          => $this->diagnostic_myisam_posts(),
+				'fulltext_posts'        => $this->diagnostic_fulltext_posts(),
 				'fulltext_disabled'     => $this->diagnostic_fulltext_disabled(),
 				'fulltext_indices'      => $this->diagnostic_fulltext_indices(),
 				'hidden_metaboxes'      => $this->diagnostic_hidden_metaboxes(),
