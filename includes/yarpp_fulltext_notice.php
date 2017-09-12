@@ -55,13 +55,13 @@ if (!(bool) yarpp_get_option('myisam_override') && (bool) $yarpp->diagnostic_ful
                 'YARPP&#39;s "consider titles" and "consider bodies" relatedness criteria require your <code>%s</code> '.
                 'table to use the fulltext indexing feature.<br/>' .
                 'Unfortunately your table does not seem to be able to use fulltext index.<br/>' .
-                'Fulltext indexing is supported in MyISAM, or InnoDB with MySQL 5.6 or higher. ',
+                'Fulltext indexing is supported in MyISAM, or InnoDB with MySQL 5.6.4 or higher. ',
                 $wpdb->posts
             ).
             '</p>'.
             '<p>'.
             sprintf(
-                'If you are using MySQL 5.5 or earlier version, to restore these features, please do the following:<br/>'.
+                'If you are using MySQL 5.6.3 or earlier version, to restore these features, please do the following:<br/>'.
                 '<ol>'.
                     '<li>'.
                         'Convert your <code>%s</code> table to <code>MyISAM</code> engine by executing the '.
