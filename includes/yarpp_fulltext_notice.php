@@ -31,8 +31,15 @@ if (isset($_POST['myisam_override'])) {
     }
 }
 
-$table_type = $yarpp->diagnostic_myisam_posts();
-if ((bool) $table_type !== true) $yarpp->disable_fulltext();
+$fulltext_posts = $yarpp->diagnostic_fulltext_posts();
+if ($fulltext_posts === true) {
+    if ((bool) get_option('yarpp_fulltext_disabled', false) === true) {
+        $yarpp->enable_fulltext();
+        update_option('yarpp_fulltext_disabled', 0);
+    }
+} else {
+    $yarpp->disable_fulltext();
+}
 
 if (!(bool) yarpp_get_option('myisam_override') && (bool) $yarpp->diagnostic_fulltext_disabled()) {
     echo(
@@ -46,16 +53,15 @@ if (!(bool) yarpp_get_option('myisam_override') && (bool) $yarpp->diagnostic_ful
             '<p>'.
             sprintf(
                 'YARPP&#39;s "consider titles" and "consider bodies" relatedness criteria require your <code>%s</code> '.
-                'table to use the <code>MyISAM</code> engine'.
-                'fulltext indexing feature. Unfortunately your table seems to be using the <code>%s</code> engine. '.
-                'Because fulltext indexing is not supported by your current table engine, these two options have been disabled.',
-                $wpdb->posts,
-                $table_type
+                'table to use the fulltext indexing feature.<br/>' .
+                'Unfortunately your table does not seem to be able to use fulltext index.<br/>' .
+                'Fulltext indexing is supported in MyISAM, or InnoDB with MySQL 5.6.4 or higher. ',
+                $wpdb->posts
             ).
             '</p>'.
             '<p>'.
             sprintf(
-                'To restore these features, please do the following:<br/>'.
+                'If you are using MySQL 5.6.3 or earlier version, to restore these features, please do the following:<br/>'.
                 '<ol>'.
                     '<li>'.
                         'Convert your <code>%s</code> table to <code>MyISAM</code> engine by executing the '.
